@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Tests for MobileLang</title>
+    <script src="mobile-lang.js"></script>
+    <script>
+      function assert(message, condition) {
+        var output = document.getElementById('output');
+        if (condition) {
+          output.appendChild(document.createTextNode('.'));
+        } else {
+          output.appendChild(document.createElement('br'));
+          output.appendChild(document.createTextNode(message));
+          output.appendChild(document.createElement('br'));
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="output"></div>
+    <script>
+      (function() {
+        var parser = new MobileLang.Parser('"Test"');
+        var string = parser.parseString();
+        assert('Test string should not be null', string != null);
+        assert('Test string type should be a string',
+               string.type == MobileLang.NodeTypes.STRING_LITERAL);
+      })();
+    </script>
+  </body>
+</html>
