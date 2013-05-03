@@ -63,6 +63,8 @@ MobileLang.Parser.prototype.parseString = function() {
   while(keepParsing && current != null) {
     this.step();
     current = this.current();
+    // Use / for escaping since it's easier than \ to get to on a mobile
+    // keyboard.
     if (!isEscaped && current == '/') {
       isEscaped = true;
     } else if (!isEscaped && current == '"') {
