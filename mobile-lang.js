@@ -18,6 +18,6 @@ MobileLang.Parser = function(code) {
   this.index = 0;
 };
 
-MobileLang.Parser.prototype.buildTree() {
+MobileLang.Parser.prototype.buildTree = function() {
   
 };
