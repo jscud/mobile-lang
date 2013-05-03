@@ -53,8 +53,25 @@ MobileLang.Parser.prototype.parseProgram = function() {
 
 MobileLang.Parser.prototype.parseString = function() {
   var str = new MobileLang.StringLiteral();
-  if (this.current() != '"') {
+  var current = this.current();
+  // Must start with a double quote.
+  if (current != '"') {
     return null;
+  }
+  var keepParsing = true;
+  var isEscaped = false;
+  while(keepParsing && current != null) {
+    this.step();
+    current = this.current();
+    if (!isEscaped && current == '/') {
+      isEscaped = true;
+    } else if (!isEscaped && current == '"') {
+      // Move past the closing double quote.
+      this.step();
+      return str;
+    } else if (current != null) {
+      str.contents += current;
+    }
   }
   return str;
 };
