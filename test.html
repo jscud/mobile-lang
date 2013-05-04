@@ -27,6 +27,14 @@
                str.type == MobileLang.NodeTypes.STRING_LITERAL);
         assert('Test string expected Test but was ' + str.contents,
                str.contents == 'Test');
+
+        parser = new MobileLang.Parser('""');
+        var str = parser.parseString();
+        assert('Empty string should not be null', str != null);
+        assert('Empty string type should be a string',
+               str.type == MobileLang.NodeTypes.STRING_LITERAL);
+        assert('Expected empty string but was ' + str.contents,
+               str.contents == '');
       })();
     </script>
   </body>
