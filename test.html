@@ -19,7 +19,7 @@
   <body>
     <div id="output"></div>
     <script>
-      (function() {
+      (function stringTests() {
         var parser = new MobileLang.Parser('"Test"');
         var str = parser.parseString();
         assert('Test string should not be null', str != null);
@@ -50,6 +50,16 @@
         var str = parser.parseString();
         assert('Expected space newline quote apostrophe tab space but was ' + str.contents,
                str.contents == ' \n"\'\t ');
+      })();
+
+      (function numberTests() {
+        var parser = new MobileLang.Parser('0');
+        var num = parser.parseNumber();
+        assert('Expected 0 to have type int',
+               num.type == MobileLang.NodeTypes.INT_LITERAL);
+        assert('Expected positive', !num.isNegative);
+        assert('Expected 0 for integer part', num.integerPart == '0');
+        assert('Éxpected empty fraction', num.fractionalPart == '');
       })();
     </script>
   </body>
