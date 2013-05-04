@@ -45,6 +45,11 @@
         var str = parser.parseString();
         assert('Expected a string ending with a / but was ' + str.contents,
                str.contents == 'string ending in a /');
+
+        var parser = new MobileLang.Parser('"/ /n/"/\'/t/ "');
+        var str = parser.parseString();
+        assert('Expected space newline quote apostrophe tab space but was ' + str.contents,
+               str.contents == ' \n"\'\t ');
       })();
     </script>
   </body>
