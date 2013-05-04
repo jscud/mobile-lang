@@ -40,6 +40,11 @@
         var str = parser.parseString();
         assert('Expected a string with a " but was ' + str.contents,
                str.contents == 'string with a " mark');
+
+        var parser = new MobileLang.Parser('"string ending in a //"');
+        var str = parser.parseString();
+        assert('Expected a string ending with a / but was ' + str.contents,
+               str.contents == 'string ending in a /');
       })();
     </script>
   </body>

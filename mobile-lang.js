@@ -74,6 +74,9 @@ MobileLang.Parser.prototype.parseString = function() {
     } else if (isEscaped && current == '"') {
       str.contents += current;
       isEscaped = false;
+    } else if (isEscaped && current == '/') {
+      str.contents += current;
+      isEscaped = false;
     } else if (current != null) {
       str.contents += current;
     }
