@@ -71,6 +71,9 @@ MobileLang.Parser.prototype.parseString = function() {
       // Move past the closing double quote.
       this.step();
       return str;
+    } else if (isEscaped && current == '"') {
+      str.contents += current;
+      isEscaped = false;
     } else if (current != null) {
       str.contents += current;
     }

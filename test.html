@@ -35,6 +35,11 @@
                str.type == MobileLang.NodeTypes.STRING_LITERAL);
         assert('Expected empty string but was ' + str.contents,
                str.contents == '');
+
+        var parser = new MobileLang.Parser('"string with a /" mark"');
+        var str = parser.parseString();
+        assert('Expected a string with a " but was ' + str.contents,
+               str.contents == 'string with a " mark');
       })();
     </script>
   </body>
