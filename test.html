@@ -4,19 +4,31 @@
     <title>Tests for MobileLang</title>
     <script src="mobile-lang.js"></script>
     <script>
+	  var testCases = 0;
+	  var passedCases = 0;
+	  
       function assert(message, condition) {
         var output = document.getElementById('output');
         if (condition) {
           output.appendChild(document.createTextNode('.'));
+		  passedCases++;
         } else {
           output.appendChild(document.createElement('br'));
           output.appendChild(document.createTextNode(message));
           output.appendChild(document.createElement('br'));
         }
+		testCases++;
       }
+	  
+	  function reportPassed() {
+	    var passed = document.getElementById('passed');
+		passed.appendChild(document.createTextNode(
+		    passedCases + '/' + testCases + ' passed'));
+	  }
     </script>
   </head>
   <body>
+    <div id="passed"></div>
     <div id="output"></div>
     <script>
       (function stringTests() {
@@ -48,8 +60,8 @@
 
         var parser = new MobileLang.Parser('"/ /n/"/\'/t/ "');
         var str = parser.parseString();
-        assert('Expected space newline quote apostrophe tab space but was ' + str.contents,
-               str.contents == ' \n"\'\t ');
+        assert('Expected space newline quote apostrophe tab space but was ' +
+		       str.contents, str.contents == ' \n"\'\t ');
       })();
 
       (function numberTests() {
@@ -61,6 +73,77 @@
         assert('Expected 0 for integer part', num.integerPart == '0');
         assert('Éxpected empty fraction', num.fractionalPart == '');
       })();
+	  
+	  (function identifierTest() {
+	    var parser = new MobileLang.Parser('x');
+		var ident = parser.parseIdentifier();
+		
+		assert('Expected identifier type',
+		       ident.type == MobileLang.NodeTypes.IDENTIFIER);
+	    assert('Expect identifier is x', ident.name == 'x');
+		
+		parser = new MobileLang.Parser('xyz1');
+		ident = parser.parseIdentifier();
+		assert('Expect identifier is xyz1', ident.name == 'xyz1');
+		
+		parser = new MobileLang.Parser('a.b');
+		ident = parser.parseIdentifier();
+		assert('Expect identifier is a', ident.name == 'a');
+		
+		parser = new MobileLang.Parser('0ident');
+		ident = parser.parseIdentifier();
+		assert('Expect empty identifier when starting with digit',
+		       ident.name == '');
+	  })();
+	  
+	  (function nextTokenTests() {
+	    var parser = new MobileLang.Parser('  x.y("example", 12)');
+		var t = parser.nextToken();
+		assert('First token should be an identifier but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.IDENTIFIER);
+	    assert('First token should be x', t.name == 'x');
+		
+		t = parser.nextToken();
+		assert('Second token should be a dot but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.DOT);
+	    assert('Second token should be .', t.character == '.');
+		
+		t = parser.nextToken();
+		assert('Third token should be an identifier but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.IDENTIFIER);
+	    assert('Third token should be y', t.name == 'y');
+		
+		t = parser.nextToken();
+		assert('Fourth token should be open paren but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.OPEN_PAREN);
+	    assert('Fourth token should be (', t.character == '(');
+		
+		t = parser.nextToken();
+		assert('Fifth token should be a string but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.STRING_LITERAL);
+	    assert('Fifth token should be "example" but was ' + t.contents,
+		       t.contents == 'example');
+		
+		t = parser.nextToken();
+		assert('Sixth token should be a comma but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.COMMA);
+	    assert('Sixth token should be ,', t.character == ',');
+		
+		t = parser.nextToken();
+		assert('Seventh token should be an int but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.INT_LITERAL);
+	    assert('Seventh token should be positive int', !t.isNegative);
+		assert('Seventh token should be 12', t.integerPart = '12');
+		assert('Seventh token should have an empty fractional part',
+		       t.fractionalPart == '');
+			   
+	    t = parser.nextToken();
+		assert('Eigth token should be close paren but was ' + t.type,
+		       t.type == MobileLang.NodeTypes.CLOSE_PAREN);
+	    assert('Eigth token should be )', t.character == ')');
+	  })();
+	  
+	  reportPassed();
     </script>
   </body>
 </html>

@@ -17,8 +17,9 @@ MobileLang.ParserState = {
   START: 0,
   STRING_LITERAL: 1,
   STRING_ESCAPE: 2,
-  NUMBER_START: 3,
-  NUMBER_INTEGER_PART: 4,
+  IDENTIFIER: 3,
+  NUMBER_START: 4,
+  NUMBER_INTEGER_PART: 5,
 };
 
 MobileLang.Parser = function(code) {
@@ -55,8 +56,32 @@ MobileLang.Parser.prototype.parseProgram = function() {
 
 MobileLang.NodeTypes = {
   STRING_LITERAL: 0,
-  INT_LITERAL: 1,
-  FLOAT_LITERAL: 2
+  IDENTIFIER: 1,
+  INT_LITERAL: 2,
+  FLOAT_LITERAL: 3,
+  OPEN_PAREN: 4,
+  CLOSE_PAREN: 5,
+  DOT: 6,
+  COMMA: 7,
+  ILLEGAL: 8
+};
+
+MobileLang.Parser.prototype.nextToken = function() {
+  // Skip over whitespace.
+  while (/\s/.test(this.current())) {
+    this.step();
+  }
+  var current = this.current();
+  var c = null;
+  if (current == '"') {
+    return this.parseString();
+  } else if (/\d/.test(current)) {
+    return this.parseNumber();
+  } else if (/[a-zA-Z]/.test(current)) {
+    return this.parseIdentifier();
+  } else {
+    return this.parseSingleCharacter();
+  }
 };
 
 MobileLang.Parser.prototype.parseString = function() {
@@ -104,24 +129,48 @@ MobileLang.StringLiteral = function() {
   this.type = MobileLang.NodeTypes.STRING_LITERAL;
 };
 
+MobileLang.Parser.prototype.parseIdentifier = function() {
+  var identifier = new MobileLang.Identifier();
+  var current = this.current();
+  if (current != null && /[a-zA-Z]/.test(current)) {
+    identifier.name += current;
+	this.step();
+	current = this.current();
+  
+    while (current != null && /[0-9a-zA-Z]/.test(current)) {
+      identifier.name += current;
+	  this.step();
+	  current = this.current();
+    }
+  }
+  return identifier;
+};
+
+MobileLang.Identifier = function() {
+  this.name = '';
+  this.type = MobileLang.NodeTypes.IDENTIFIER;
+};
+
 MobileLang.Parser.prototype.parseNumber = function() {
   var num = new MobileLang.NumberLiteral();
   var current = this.current();
   var keepGoing = true;
   this.state = MobileLang.ParserState.NUMBER_START;
   while (keepGoing && current != null) {
-    this.step();
     if (this.state == MobileLang.ParserState.NUMBER_START && current == '-') {
       num.isNegative = true;
       num.type = MobileLang.NodeTypes.INT_LITERAL;
       this.state = MobileLang.ParserState.NUMBER_INTEGER_PART;
+	  this.step();
     } else if (/\d/.test(current) && this.state == MobileLang.ParserState.NUMBER_START) {
       num.isNegative = false;
       num.type = MobileLang.NodeTypes.INT_LITERAL;
       num.integerPart += current;
       this.state = MobileLang.ParserState.NUMBER_INTEGER_PART;
+	  this.step();
     } else if (/\d/.test(current) && this.state == MobileLang.ParserState.NUMBER_INTEGER_PART) {
-      this.integerPart += current;
+      num.integerPart += current;
+	  this.step();
     } else {
       keepGoing = false;
     }
@@ -134,5 +183,33 @@ MobileLang.NumberLiteral = function() {
   this.isNegative = null;
   this.integerPart = '';
   this.fractionalPart = '';
+  this.type = null;
+};
+
+MobileLang.Parser.prototype.parseSingleCharacter = function() {
+  var c = new MobileLang.SingleCharacter();
+  c.character = this.current();
+  switch (c.character) {
+    case '(':
+	  c.type = MobileLang.NodeTypes.OPEN_PAREN;
+	  break;
+	case ')':
+	  c.type = MobileLang.NodeTypes.CLOSE_PAREN;
+	  break;
+	case '.':
+	  c.type = MobileLang.NodeTypes.DOT;
+	  break;
+	case ',':
+	  c.type = MobileLang.NodeTypes.COMMA;
+	  break;
+	default:
+	  c.type = MobileLang.NodeTypes.ILLEGAL;
+  }
+  this.step();
+  return c;
+};
+
+MobileLang.SingleCharacter = function() {
+  this.character = '';
   this.type = null;
 };
